@@ -8,6 +8,7 @@ import (
 	"github.com/dantin/syncer/db"
 	"github.com/dantin/syncer/utils"
 	"github.com/juju/errors"
+	"github.com/BurntSushi/toml"
 )
 
 // Config is the configuration.
@@ -146,5 +147,29 @@ func (c *Config) Parse(arguments []string) error {
 		return flag.ErrHelp
 	}
 
+	// Load config file if specified
+	if c.configFile != "" {
+		err = c.configFromFile(c.configFile)
+		if err != nil {
+			return errors.Trace(err)
+		}
+	}
+
+	// Parse again to replace with command line options.
+	err = c.FlagSet.Parse(arguments)
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	if len(c.FlagSet.Args()) != 0 {
+		return errors.Errorf("'%s' is an invalid flag", c.Arg(0))
+	}
+
 	return nil
+}
+
+// Load config from file
+func (c *Config) configFromFile(path string) error {
+	_, err := toml.DecodeFile(path, c)
+	return errors.Trace(err)
 }
