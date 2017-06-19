@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"os"
 
 	"github.com/dantin/syncer/config"
@@ -24,5 +23,16 @@ func main() {
 
 	log.SetLevelByString(cfg.LogLevel)
 
-	fmt.Println(cfg)
+	if len(cfg.LogFile) > 0 {
+		log.SetOutputByName(cfg.LogFile)
+		log.SetHighlighting(false)
+		if cfg.LogRotate == "hour" {
+			log.SetRotateByHour()
+		} else {
+			log.SetRotateByDay()
+		}
+	}
+
+	log.Infof("config: %s", cfg)
+
 }
