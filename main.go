@@ -4,13 +4,12 @@ import (
 	"flag"
 	"os"
 
-	"github.com/dantin/syncer/config"
 	"github.com/juju/errors"
 	"github.com/ngaut/log"
 )
 
 func main() {
-	cfg := config.NewConfig()
+	cfg := NewConfig()
 	err := cfg.Parse(os.Args[1:])
 	switch errors.Cause(err) {
 	case nil:
@@ -35,4 +34,5 @@ func main() {
 
 	log.Infof("config: %s", cfg)
 
+	//syncer := NewSyncer(cfg)
 }

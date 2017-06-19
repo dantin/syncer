@@ -1,4 +1,4 @@
-package config
+package main
 
 import (
 	"flag"
@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/BurntSushi/toml"
-	"github.com/dantin/syncer/db"
 	"github.com/dantin/syncer/utils"
 	"github.com/juju/errors"
 )
@@ -72,7 +71,7 @@ func (c Config) String() string {
 		c.LogLevel, c.LogFile, c.LogRotate, c.StatusAddr,
 		c.ServerID, c.WorkerCount, c.Batch, c.Meta,
 		doTablesStr, c.DoDBs, ingnoreTablesStr, c.IgnoreDBs,
-		c.From, c.To, c.SkipSQLs, routeRulesStr, c.EnableGTID, db.SafeMode)
+		c.From, c.To, c.SkipSQLs, routeRulesStr, c.EnableGTID, safeMode)
 }
 
 // DBConfig is the DB configuration.
@@ -129,7 +128,7 @@ func NewConfig() *Config {
 	fs.StringVar(&cfg.LogRotate, "log-rotate", "day", "log file rotate type, hour/day")
 	fs.BoolVar(&cfg.EnableGTID, "enable-gtid", false, "enable gtid mode")
 	fs.BoolVar(&cfg.AutoFixGTID, "auto-fix-gtid", false, "auto fix gtid while switch mysql master/slave")
-	fs.BoolVar(&db.SafeMode, "safe-mode", false, "enable safe mode to make syncerreentrant")
+	fs.BoolVar(&safeMode, "safe-mode", false, "enable safe mode to make syncerreentrant")
 
 	return cfg
 }
