@@ -6,6 +6,8 @@ import (
 	"strings"
 
 	"github.com/dantin/syncer/db"
+	"github.com/dantin/syncer/utils"
+	"github.com/juju/errors"
 )
 
 // Config is the configuration.
@@ -111,6 +113,38 @@ func (r RouteRule) String() string {
 
 func NewConfig() *Config {
 	cfg := &Config{}
+	cfg.FlagSet = flag.NewFlagSet("syncer", flag.ContinueOnError)
+	fs := cfg.FlagSet
+
+	fs.BoolVar(&cfg.printVersion, "V", false, "print version and exit")
+	fs.StringVar(&cfg.configFile, "config", "", "path to config file")
+	fs.IntVar(&cfg.ServerID, "server-id", 101, "MySQL slave server ID")
+	fs.IntVar(&cfg.WorkerCount, "c", 16, "parallel worker count")
+	fs.IntVar(&cfg.Batch, "b", 10, "batch commit count")
+	fs.StringVar(&cfg.StatusAddr, "status-addr", "", "status addr")
+	fs.StringVar(&cfg.Meta, "meta", "syncer.meta", "syncer meta info")
+	fs.StringVar(&cfg.LogLevel, "L", "info", "log level: debug, info, warn, error, fatal")
+	fs.StringVar(&cfg.LogFile, "log-file", "", "log file path")
+	fs.StringVar(&cfg.LogRotate, "log-rotate", "day", "log file rotate type, hour/day")
+	fs.BoolVar(&cfg.EnableGTID, "enable-gtid", false, "enable gtid mode")
+	fs.BoolVar(&cfg.AutoFixGTID, "auto-fix-gtid", false, "auto fix gtid while switch mysql master/slave")
+	fs.BoolVar(&db.SafeMode, "safe-mode", false, "enable safe mode to make syncerreentrant")
 
 	return cfg
+}
+
+// Parse parses flag definitions from the argument list.
+func (c *Config) Parse(arguments []string) error {
+	// Parse first to get config file.
+	err := c.FlagSet.Parse(arguments)
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	if c.printVersion {
+		fmt.Printf(utils.GetRawInfo("syncer"))
+		return flag.ErrHelp
+	}
+
+	return nil
 }
