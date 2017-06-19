@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/BurntSushi/toml"
 	"github.com/dantin/syncer/db"
 	"github.com/dantin/syncer/utils"
 	"github.com/juju/errors"
-	"github.com/BurntSushi/toml"
 )
 
 // Config is the configuration.
@@ -165,7 +165,30 @@ func (c *Config) Parse(arguments []string) error {
 		return errors.Errorf("'%s' is an invalid flag", c.Arg(0))
 	}
 
+	c.adjust()
+
 	return nil
+}
+
+func (c *Config) adjust() {
+	for _, table := range c.DoTables {
+		table.Name = strings.ToLower(table.Name)
+		table.Schema = strings.ToLower(table.Schema)
+	}
+	for _, table := range c.IgnoreTables {
+		table.Name = strings.ToLower(table.Name)
+		table.Schema = strings.ToLower(table.Schema)
+	}
+	for i, db := range c.IgnoreDBs {
+		c.IgnoreDBs[i] = strings.ToLower(db)
+	}
+	for i, db := range c.DoDBs {
+		c.DoDBs[i] = strings.ToLower(db)
+	}
+	for _, rule := range c.RouteRules {
+		rule.PatternSchema = strings.ToLower(rule.PatternSchema)
+		rule.PatternTable = strings.ToLower(rule.PatternTable)
+	}
 }
 
 // Load config from file
