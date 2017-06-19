@@ -80,11 +80,19 @@ type DBConfig struct {
 	Port     int    `toml:"port" json:"port"`
 }
 
+func (c DBConfig) String() string {
+	return fmt.Sprintf("DBConfig(host:%s, user:%s, port:%d, pass:<omitted>)", c.Host, c.User, c.Port)
+}
+
 // TableName is the Table configuration
 // slave restrict replication to a given table
 type TableName struct {
 	Schema string `toml:"db-name" json:"db-name"`
 	Name   string `toml:"tbl-name" json:"tbl-name"`
+}
+
+func (t TableName) String() string {
+	return fmt.Sprintf("TableName(schema: %s, name: %s)", t.Schema, t.Name)
 }
 
 // RouteRule is route rule that syncing
@@ -93,7 +101,12 @@ type RouteRule struct {
 	PatternSchema string `toml:"pattern-schema" json:"pattern-schema"`
 	PatternTable  string `toml:"pattern-table" json:"pattern-table"`
 	TargetSchema  string `toml:"target-schema" json:"target-schema"`
-	TargetTable  string `toml:"target-table" json:"target-table"`
+	TargetTable   string `toml:"target-table" json:"target-table"`
+}
+
+func (r RouteRule) String() string {
+	return fmt.Sprintf("RouteRule(patternSchema: %s, patternTable: %s, targetSchema: %s, targetTable: %s)",
+		r.PatternSchema, r.PatternTable, r.TargetSchema, r.TargetTable)
 }
 
 func NewConfig() *Config {

@@ -1,1 +1,3 @@
-# syncer
+# Syncer
+
+MySQL binlog sync tool
