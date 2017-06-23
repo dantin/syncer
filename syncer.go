@@ -12,12 +12,15 @@ type Syncer struct {
 
 	cfg *Config
 
+	meta Meta
+
 	done chan struct{}
 }
 
 func NewSyncer(cfg *Config) *Syncer {
 	syncer := new(Syncer)
 	syncer.cfg = cfg
+	syncer.meta = NewLocalMeta(cfg.Meta)
 
 	syncer.done = make(chan struct{})
 
