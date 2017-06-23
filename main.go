@@ -2,7 +2,10 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/juju/errors"
 	"github.com/ngaut/log"
@@ -34,5 +37,28 @@ func main() {
 
 	log.Infof("config: %s", cfg)
 
-	//syncer := NewSyncer(cfg)
+	syncer := NewSyncer(cfg)
+
+	sc := make(chan os.Signal, 1)
+	signal.Notify(sc,
+		syscall.SIGHUP,
+		syscall.SIGINT,
+		syscall.SIGTERM,
+		syscall.SIGQUIT,
+	)
+
+	go func() {
+		sig := <-sc
+		log.Infof("got signal [%d], exit", sig)
+		syncer.Close()
+	}()
+
+	fmt.Println(syncer)
+	fmt.Println("awaiting signal")
+
+	err = syncer.Start()
+	if err != nil {
+		log.Error(errors.ErrorStack(err))
+	}
+	fmt.Println("exiting")
 }
