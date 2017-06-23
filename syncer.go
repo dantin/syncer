@@ -1,9 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"sync"
 
-	"fmt"
+	"github.com/juju/errors"
 )
 
 // Syncer can sync your MySQL data to another MySQL database.
@@ -28,6 +29,11 @@ func NewSyncer(cfg *Config) *Syncer {
 }
 
 func (s *Syncer) Start() error {
+	err := s.meta.Load()
+	if err != nil {
+		return errors.Trace(err)
+	}
+	fmt.Println(s.meta)
 
 	s.done <- struct{}{}
 
