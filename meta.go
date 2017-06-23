@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"sync"
 	"time"
@@ -11,7 +12,6 @@ import (
 	"github.com/siddontang/go-mysql/mysql"
 	"github.com/siddontang/go/ioutil2"
 	"github.com/siddontang/go/log"
-	"fmt"
 )
 
 var (
@@ -43,8 +43,8 @@ type Meta interface {
 type LocalMeta struct {
 	sync.RWMutex
 
-	filename   string
-	saveTime   time.Time
+	filename string
+	saveTime time.Time
 
 	BinLogName string `toml:"binlog-name" json:"binlog-name"`
 	BinLogPos  uint32 `toml:"binlog-pos" json:"binlog-pos"`
