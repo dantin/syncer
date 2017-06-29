@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	"github.com/BurntSushi/toml"
-	"github.com/juju/errors"
 	"github.com/dantin/syncer/utils"
+	"github.com/juju/errors"
 )
 
 // NewConfig creates a new config.
