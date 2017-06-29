@@ -9,9 +9,9 @@ import (
 
 	"github.com/BurntSushi/toml"
 	"github.com/juju/errors"
+	"github.com/ngaut/log"
 	"github.com/siddontang/go-mysql/mysql"
 	"github.com/siddontang/go/ioutil2"
-	"github.com/siddontang/go/log"
 )
 
 var (
@@ -27,7 +27,7 @@ type Meta interface {
 	// Save saves meta information.
 	Save(pos mysql.Position, gtid GTIDSet, force bool) error
 
-	// Flush write meta information.
+	// Flush write meta information
 	Flush() error
 
 	// Check checks whether we should save meta.
@@ -40,6 +40,7 @@ type Meta interface {
 	GTID() (GTIDSet, error)
 }
 
+// LocalMeta is local meta struct.
 type LocalMeta struct {
 	sync.RWMutex
 
@@ -48,7 +49,7 @@ type LocalMeta struct {
 
 	BinLogName string `toml:"binlog-name" json:"binlog-name"`
 	BinLogPos  uint32 `toml:"binlog-pos" json:"binlog-pos"`
-	BinLogGTID string `toml:"binlog-gtid" json:"binlog-gtid"`
+	BinlogGTID string `toml:"binlog-gtid" json:"binlog-gtid"`
 }
 
 // NewLocalMeta creates a new LocalMeta.
@@ -78,7 +79,7 @@ func (lm *LocalMeta) Save(pos mysql.Position, gs GTIDSet, force bool) error {
 
 	lm.BinLogName = pos.Name
 	lm.BinLogPos = pos.Pos
-	lm.BinLogGTID = gs.String()
+	lm.BinlogGTID = gs.String()
 
 	if force {
 		return lm.Flush()
@@ -93,29 +94,19 @@ func (lm *LocalMeta) Flush() error {
 	err := e.Encode(lm)
 	if err != nil {
 		log.Errorf("save meta info to file %s failed: %v", lm.filename, errors.ErrorStack(err))
+		return errors.Trace(err)
 	}
 
 	err = ioutil2.WriteFileAtomic(lm.filename, buf.Bytes(), 0644)
 	if err != nil {
 		log.Errorf("save meta info to file %s failed: %v", lm.filename, errors.ErrorStack(err))
+		return errors.Trace(err)
 	}
 
 	lm.saveTime = time.Now()
-	log.Infof("save position to file, binlog-name:%s binlog-pos:%d binlog-gtid:%v", lm.BinLogName, lm.BinLogPos, lm.BinLogGTID)
+	log.Infof("save position to file, binlog-name:%s binlog-pos:%d binlog-gtid:%v", lm.BinLogName, lm.BinLogPos, lm.BinlogGTID)
 
 	return nil
-}
-
-// Check implements Meta.GTID interface
-func (lm *LocalMeta) Check() bool {
-	lm.RLock()
-	defer lm.RUnlock()
-
-	if time.Since(lm.saveTime) >= maxSaveTime {
-		return true
-	}
-
-	return false
 }
 
 // Pos implements Meta.Pos interface.
@@ -126,12 +117,24 @@ func (lm *LocalMeta) Pos() mysql.Position {
 	return mysql.Position{Name: lm.BinLogName, Pos: lm.BinLogPos}
 }
 
-// GTID implements Meta.GTID interface.
+// GTID implements Meta.GTID interface
 func (lm *LocalMeta) GTID() (GTIDSet, error) {
 	lm.RLock()
 	defer lm.RUnlock()
 
-	return parseGTIDSet(lm.BinLogGTID)
+	return parseGTIDSet(lm.BinlogGTID)
+}
+
+// Check implements Meta.Check interface.
+func (lm *LocalMeta) Check() bool {
+	lm.RLock()
+	defer lm.RUnlock()
+
+	if time.Since(lm.saveTime) >= maxSaveTime {
+		return true
+	}
+
+	return false
 }
 
 func (lm *LocalMeta) String() string {

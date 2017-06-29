@@ -6,6 +6,7 @@ import (
 )
 
 // GTIDSet wraps mysql.MysqlGTIDSet
+// todo: wrap mysql.GTIDSet
 type GTIDSet struct {
 	*mysql.MysqlGTIDSet
 }

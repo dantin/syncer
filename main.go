@@ -2,7 +2,7 @@ package main
 
 import (
 	"flag"
-	"fmt"
+	_ "net/http/pprof"
 	"os"
 	"os/signal"
 	"syscall"
@@ -28,6 +28,7 @@ func main() {
 	if len(cfg.LogFile) > 0 {
 		log.SetOutputByName(cfg.LogFile)
 		log.SetHighlighting(false)
+
 		if cfg.LogRotate == "hour" {
 			log.SetRotateByHour()
 		} else {
@@ -44,8 +45,7 @@ func main() {
 		syscall.SIGHUP,
 		syscall.SIGINT,
 		syscall.SIGTERM,
-		syscall.SIGQUIT,
-	)
+		syscall.SIGQUIT)
 
 	go func() {
 		sig := <-sc
@@ -53,12 +53,12 @@ func main() {
 		syncer.Close()
 	}()
 
-	fmt.Println(syncer)
-	fmt.Println("awaiting signal")
+	if cfg.StatusAddr != "" {
+		initStatusAndMetrics(cfg.StatusAddr)
+	}
 
 	err = syncer.Start()
 	if err != nil {
 		log.Error(errors.ErrorStack(err))
 	}
-	fmt.Println("exiting")
 }
