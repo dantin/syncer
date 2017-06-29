@@ -9,9 +9,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/dantin/syncer/tableroute"
 	"github.com/juju/errors"
 	"github.com/ngaut/log"
-	"github.com/pingcap/tidb-enterprise-tools/pkg/tableroute"
 	"github.com/satori/go.uuid"
 	"github.com/siddontang/go-mysql/mysql"
 	"github.com/siddontang/go-mysql/replication"
